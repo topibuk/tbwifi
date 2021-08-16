@@ -10,11 +10,18 @@
 #include "esp_wifi.h"
 #include "freertos/event_groups.h"
 
+#define WIFI_CONNECT_MAXIMUM_RETRY 20
+
 class TBWiFi
 {
 private:
+	static int retry_count;
+	static bool connected;
+
 	TBWiFi();
 	static void task(void *v);
+	static void eventHandler(void *arg, esp_event_base_t event_base,
+				 int32_t event_id, void *event_data);
 
 public:
 	static TBWiFi &getInstance();
