@@ -1,11 +1,10 @@
 #ifndef TBWIFI_HPP
 #define TBWIFI_HPP
 
-/*
 #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "esp_log.h"
+
 #define LOG_TAG "component: TBWiFi"
-*/
 
 #include "nvs_flash.h"
 #include "esp_wifi.h"
