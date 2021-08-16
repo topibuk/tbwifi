@@ -14,6 +14,7 @@ class TBWiFi
 {
 private:
 	TBWiFi();
+	static void task(void *v);
 
 public:
 	static TBWiFi &getInstance();
