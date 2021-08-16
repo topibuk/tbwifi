@@ -25,6 +25,10 @@ private:
 
 public:
 	static TBWiFi &getInstance();
+	static bool isConnected()
+	{
+		return connected;
+	};
 	TBWiFi(const TBWiFi &) = delete;		  // remove copy constructor
 	const TBWiFi &operator=(const TBWiFi &) = delete; // remove assignment constructor
 };
