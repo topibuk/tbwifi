@@ -2,11 +2,16 @@
 #include <string.h>
 
 bool TBWiFi::connected;
+bool TBWiFi::started;
 int TBWiFi::retry_count;
+TBWiFi TBWiFi::instance;
+bool TBWiFi::use_password = false;
+char *TBWiFi::ssid = NULL;
+char *TBWiFi::password = NULL;
+TaskHandle_t TBWiFi::task_handle;
 
 TBWiFi &TBWiFi::getInstance()
 {
-	static TBWiFi instance{};
 	ESP_LOGV(LOG_TAG, "returning instance %d", (int)&instance);
 	return instance;
 }
@@ -53,11 +58,16 @@ void TBWiFi::task(void *v)
 	    &instance_got_ip));
 
 	wifi_config_t wifi_config;
-	memset(&wifi_config, 0, sizeof(wifi_config));
-	const char *ssid = "victanNG";
-	const char *password = "yioX1koh ahN1aigo";
-	strcpy((char *)wifi_config.sta.ssid, ssid);
-	strcpy((char *)wifi_config.sta.password, password);
+	if (TBWiFi::use_password)
+	{
+		memset(&wifi_config, 0, sizeof(wifi_config));
+		strcpy((char *)wifi_config.sta.ssid, TBWiFi::ssid);
+		strcpy((char *)wifi_config.sta.password, TBWiFi::password);
+	}
+	else
+	{
+		esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+	}
 
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
@@ -75,8 +85,27 @@ void TBWiFi::task(void *v)
 TBWiFi::TBWiFi()
 {
 	ESP_LOGV(LOG_TAG, "tbwifi constructor called");
+}
 
-	xTaskCreate(task, "TBWiFi_task", 4096, NULL, 10, NULL);
+void TBWiFi::start()
+{
+	if (!TBWiFi::started)
+	{
+		xTaskCreate(task, "TBWiFi_task", 4096, NULL, 10, &TBWiFi::task_handle);
+		TBWiFi::started = true;
+	}
+}
+
+void TBWiFi::stop()
+{
+	if (TBWiFi::started)
+	{
+		TBWiFi::started = false;
+		xTaskCreate(task, "TBWiFi_task", 4096, NULL, 10, &TBWiFi::task_handle);
+		TBWiFi::ssid = NULL;
+		TBWiFi::password = NULL;
+		TBWiFi::use_password = false;
+	}
 }
 
 void TBWiFi::eventHandler(void *arg, esp_event_base_t event_base,

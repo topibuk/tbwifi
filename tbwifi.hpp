@@ -17,6 +17,12 @@ class TBWiFi
 private:
 	static int retry_count;
 	static bool connected;
+	static bool started;
+	static char *ssid;
+	static char *password;
+	static bool use_password;
+	static TBWiFi instance;
+	static TaskHandle_t task_handle;
 
 	TBWiFi();
 	static void task(void *v);
@@ -29,6 +35,15 @@ public:
 	{
 		return connected;
 	};
+	static void start();
+	static void start(char *ssid, char *password)
+	{
+		TBWiFi::ssid = ssid;
+		TBWiFi::password = password;
+		TBWiFi::use_password = true;
+		start();
+	};
+	static void stop();
 	TBWiFi(const TBWiFi &) = delete;		  // remove copy constructor
 	const TBWiFi &operator=(const TBWiFi &) = delete; // remove assignment constructor
 };
